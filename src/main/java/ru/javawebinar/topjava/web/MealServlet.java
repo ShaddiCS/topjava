@@ -7,6 +7,7 @@ import ru.javawebinar.topjava.repository.MealsRepo;
 import ru.javawebinar.topjava.repository.MealsRepoMemoryImpl;
 import ru.javawebinar.topjava.util.MealsUtil;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -24,9 +25,10 @@ public class MealServlet extends HttpServlet {
     private MealsRepo MemoryRepo;
     private static final Logger Log = getLogger(MealServlet.class);
 
-    public MealServlet() {
-        super();
-        MemoryRepo = MealsRepoMemoryImpl.getInstance();
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        MemoryRepo = new MealsRepoMemoryImpl();
     }
 
     @Override
@@ -39,40 +41,40 @@ public class MealServlet extends HttpServlet {
         if (id == null || id.isEmpty()) {
             MemoryRepo.add(new Meal(dateTime, description, calories));
         } else {
-            Meal meal = new Meal(dateTime, description, calories);
-            meal.setId(Integer.parseInt(id));
+            Meal meal = new Meal(Integer.parseInt(id), dateTime, description, calories);
             MemoryRepo.update(meal);
         }
 
-        req.setAttribute("meals", MealsUtil.filteredByStreams(MemoryRepo.getAll(), LocalTime.MIN, LocalTime.MAX, 2000));
-        req.getRequestDispatcher("meals.jsp").forward(req, resp);
+        resp.sendRedirect("meals");
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String forward;
         String action = req.getParameter("action");
+        int mealId;
+        List<MealTo> mealToList;
+        String forward;
 
-        if (action.equalsIgnoreCase("delete")) {
-            int mealId = Integer.parseInt(req.getParameter("mealId"));
-            MemoryRepo.delete(mealId);
-            forward = LIST_MEAL;
-            List<MealTo> mealToList = MealsUtil.filteredByStreams(MemoryRepo.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
+        if (action == null || action.isEmpty()) {
+            mealToList = MealsUtil.filteredByStreams(MemoryRepo.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
             req.setAttribute("meals", mealToList);
+            forward = LIST_MEAL;
+        } else if (action.equalsIgnoreCase("delete")) {
+            mealId = Integer.parseInt(req.getParameter("mealId"));
+            MemoryRepo.delete(mealId);
+            mealToList = MealsUtil.filteredByStreams(MemoryRepo.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
+            req.setAttribute("meals", mealToList);
+            resp.sendRedirect("meals");
+            return;
         } else if (action.equalsIgnoreCase("edit")) {
-            int mealId = Integer.parseInt(req.getParameter("mealId"));
-            forward = INSERT_OR_EDIT;
+            mealId = Integer.parseInt(req.getParameter("mealId"));
             Meal meal = MemoryRepo.getById(mealId);
             req.setAttribute("meal", meal);
-        } else if (action.equalsIgnoreCase("listMeals")) {
-            forward = LIST_MEAL;
-            List<MealTo> mealToList = MealsUtil.filteredByStreams(MemoryRepo.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
-            req.setAttribute("meals", mealToList);
+            forward = INSERT_OR_EDIT;
         } else {
             forward = INSERT_OR_EDIT;
         }
-
-        Log.debug("redirect to meal list");
+        Log.debug("redirect to meal list or edit page");
         req.getRequestDispatcher(forward).forward(req, resp);
     }
 }
