@@ -22,13 +22,13 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class MealServlet extends HttpServlet {
     private static final String INSERT_OR_EDIT = "meal.jsp";
     private static final String LIST_MEAL = "meals.jsp";
-    private MealsRepo MemoryRepo;
     private static final Logger Log = getLogger(MealServlet.class);
+    private MealsRepo memoryRepo;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        MemoryRepo = new MealsRepoMemoryImpl();
+        memoryRepo = new MealsRepoMemoryImpl();
     }
 
     @Override
@@ -39,10 +39,10 @@ public class MealServlet extends HttpServlet {
         LocalDateTime dateTime = LocalDateTime.parse(req.getParameter("dateTime"));
         String id = req.getParameter("mealId");
         if (id == null || id.isEmpty()) {
-            MemoryRepo.add(new Meal(dateTime, description, calories));
+            memoryRepo.add(new Meal(dateTime, description, calories));
         } else {
             Meal meal = new Meal(Integer.parseInt(id), dateTime, description, calories);
-            MemoryRepo.update(meal);
+            memoryRepo.update(meal);
         }
 
         resp.sendRedirect("meals");
@@ -56,23 +56,28 @@ public class MealServlet extends HttpServlet {
         String forward;
 
         if (action == null || action.isEmpty()) {
-            mealToList = MealsUtil.filteredByStreams(MemoryRepo.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
-            req.setAttribute("meals", mealToList);
-            forward = LIST_MEAL;
-        } else if (action.equalsIgnoreCase("delete")) {
-            mealId = Integer.parseInt(req.getParameter("mealId"));
-            MemoryRepo.delete(mealId);
-            mealToList = MealsUtil.filteredByStreams(MemoryRepo.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
-            req.setAttribute("meals", mealToList);
-            resp.sendRedirect("meals");
-            return;
-        } else if (action.equalsIgnoreCase("edit")) {
-            mealId = Integer.parseInt(req.getParameter("mealId"));
-            Meal meal = MemoryRepo.getById(mealId);
-            req.setAttribute("meal", meal);
-            forward = INSERT_OR_EDIT;
-        } else {
-            forward = INSERT_OR_EDIT;
+            action = "list";
+        }
+
+        switch (action) {
+            case "list":
+                mealToList = MealsUtil.filteredByStreams(memoryRepo.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
+                req.setAttribute("meals", mealToList);
+                forward = LIST_MEAL;
+                break;
+            case "delete":
+                mealId = Integer.parseInt(req.getParameter("mealId"));
+                memoryRepo.delete(mealId);
+                resp.sendRedirect("meals");
+                return;
+            case "edit":
+                mealId = Integer.parseInt(req.getParameter("mealId"));
+                Meal meal = memoryRepo.getById(mealId);
+                req.setAttribute("meal", meal);
+                forward = INSERT_OR_EDIT;
+                break;
+            default:
+                forward = INSERT_OR_EDIT;
         }
         Log.debug("redirect to meal list or edit page");
         req.getRequestDispatcher(forward).forward(req, resp);
