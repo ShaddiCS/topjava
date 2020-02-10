@@ -60,11 +60,6 @@ public class MealServlet extends HttpServlet {
         }
 
         switch (action) {
-            case "list":
-                mealToList = MealsUtil.filteredByStreams(memoryRepo.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
-                req.setAttribute("meals", mealToList);
-                forward = LIST_MEAL;
-                break;
             case "delete":
                 mealId = Integer.parseInt(req.getParameter("mealId"));
                 memoryRepo.delete(mealId);
@@ -76,8 +71,13 @@ public class MealServlet extends HttpServlet {
                 req.setAttribute("meal", meal);
                 forward = INSERT_OR_EDIT;
                 break;
-            default:
+            case "insert":
                 forward = INSERT_OR_EDIT;
+                break;
+            default:
+                mealToList = MealsUtil.filteredByStreams(memoryRepo.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
+                req.setAttribute("meals", mealToList);
+                forward = LIST_MEAL;
         }
         Log.debug("redirect to meal list or edit page");
         req.getRequestDispatcher(forward).forward(req, resp);
