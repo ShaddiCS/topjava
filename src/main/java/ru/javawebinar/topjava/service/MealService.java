@@ -2,8 +2,9 @@ package ru.javawebinar.topjava.service;
 
 import org.springframework.stereotype.Service;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.to.MealTo;
+import ru.javawebinar.topjava.util.MealsUtil;
 
 import java.util.Collection;
 
@@ -30,11 +31,11 @@ public class MealService {
         return checkNotFoundWithId(repository.get(userId, id), id);
     }
 
-    public Collection<Meal> getAll(int userId) {
-        return repository.getAll(userId);
+    public Collection<MealTo> getAll(int userId, int caloriesPerDay) {
+        return MealsUtil.getTos(repository.getAll(userId), caloriesPerDay);
     }
 
     public void update(Meal meal) {
-        repository.save(meal);
+        checkNotFoundWithId(repository.save(meal), meal.getId());
     }
 }
