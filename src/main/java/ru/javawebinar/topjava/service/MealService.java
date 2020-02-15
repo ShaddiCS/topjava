@@ -1,11 +1,15 @@
 package ru.javawebinar.topjava.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.to.MealTo;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collection;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFoundWithId;
@@ -15,6 +19,7 @@ public class MealService {
 
     private final MealRepository repository;
 
+    @Autowired
     public MealService(MealRepository repository) {
         this.repository = repository;
     }
@@ -31,11 +36,14 @@ public class MealService {
         return checkNotFoundWithId(repository.get(userId, id), id);
     }
 
-    public Collection<MealTo> getAll(int userId, int caloriesPerDay) {
-        return MealsUtil.getTos(repository.getAll(userId), caloriesPerDay);
+    public void update(Meal meal, int id) {
+        checkNotFoundWithId(repository.save(meal), id);
     }
 
-    public void update(Meal meal) {
-        checkNotFoundWithId(repository.save(meal), meal.getId());
+    public Collection<MealTo> getFiltered(int userId, int calories, LocalDate fromDate, LocalDate toDate, LocalTime fromTime, LocalTime toTime) {
+        return MealsUtil.filteredByStreams(repository.findByDateBetween(userId, calories, fromDate, toDate),
+                calories,
+                meal -> DateTimeUtil.isBetweenInclusive(meal.getTime(), fromTime, toTime));
     }
+
 }
