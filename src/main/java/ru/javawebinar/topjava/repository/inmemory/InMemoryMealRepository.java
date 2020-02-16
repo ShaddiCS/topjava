@@ -65,6 +65,9 @@ public class InMemoryMealRepository implements MealRepository {
         log.info("get all between {} and {}", fromDate, toDate);
         Map<Integer, Meal> mealMap = repository.get(userId);
 
+        if (mealMap == null) {
+            return new ArrayList<>();
+        }
         return getWithPredicate(mealMap.values(), meal -> DateTimeUtil.isBetweenInclusive(meal.getDate(), fromDate, toDate));
     }
 
@@ -73,6 +76,9 @@ public class InMemoryMealRepository implements MealRepository {
         log.info("get all");
         Map<Integer, Meal> mealMap = repository.get(userId);
 
+        if (mealMap == null) {
+            return new ArrayList<>();
+        }
         return getWithPredicate(mealMap.values(), meal -> true);
     }
 
