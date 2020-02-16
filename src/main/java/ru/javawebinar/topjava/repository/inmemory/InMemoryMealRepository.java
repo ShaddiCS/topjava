@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Repository
@@ -21,7 +22,8 @@ public class InMemoryMealRepository implements MealRepository {
     private AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.MEALS.forEach(meal -> save(1, meal));
+        MealsUtil.MEALS.forEach(meal -> this.save(1, meal));
+        MealsUtil.MEALS_SECOND.forEach(meal -> this.save(2, meal));
     }
 
     @Override
@@ -33,41 +35,51 @@ public class InMemoryMealRepository implements MealRepository {
             return meal;
         }
         // handle case: update, but not present in storage
-        return repository.get(userId).computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
+        return repository.computeIfAbsent(userId, HashMap::new).computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
     }
 
     @Override
     public boolean delete(int userId, int id) {
         log.info("delete {}", id);
-        return repository.computeIfAbsent(userId, HashMap::new).remove(id) != null;
+        Map<Integer, Meal> mealMap = repository.get(userId);
+
+        if (mealMap == null) {
+            return false;
+        }
+        return mealMap.remove(id) != null;
     }
 
     @Override
     public Meal get(int userId, int id) {
         log.info("get {}", id);
-        return repository.computeIfAbsent(userId, HashMap::new).get(id);
+        Map<Integer, Meal> mealMap = repository.get(userId);
+
+        if (mealMap == null) {
+            return null;
+        }
+        return mealMap.get(id);
     }
 
     @Override
-    public Collection<Meal> findByDateBetween(int userId, int calories, LocalDate fromDate, LocalDate toDate) {
-        if(repository.get(userId) == null) {
-            return repository.computeIfAbsent(userId, HashMap::new).values();
-        }
-        return repository.get(userId).values().stream()
-                .filter(meal -> DateTimeUtil.isBetweenInclusive(meal.getDate(), fromDate, toDate))
-                .sorted(Comparator.comparing(Meal::getDate).reversed()
-                    .thenComparing(Comparator.comparing(Meal::getTime).reversed()))
-                .collect(Collectors.toList());
+    public List<Meal> findByDateBetween(int userId, LocalDate fromDate, LocalDate toDate) {
+        log.info("get all between {} and {}", fromDate, toDate);
+        Map<Integer, Meal> mealMap = repository.get(userId);
+
+        return getWithPredicate(mealMap.values(), meal -> DateTimeUtil.isBetweenInclusive(meal.getDate(), fromDate, toDate));
     }
 
     @Override
-    public Collection<Meal> getAll(int userId) {
-        if(repository.get(userId) == null) {
-            return repository.computeIfAbsent(userId, HashMap::new).values();
-        }
-        return repository.get(userId).values().stream()
-                .sorted(Comparator.comparing(Meal::getDate).reversed()
-                        .thenComparing(Comparator.comparing(Meal::getTime).reversed()))
+    public List<Meal> getAll(int userId) {
+        log.info("get all");
+        Map<Integer, Meal> mealMap = repository.get(userId);
+
+        return getWithPredicate(mealMap.values(), meal -> true);
+    }
+
+    private List<Meal> getWithPredicate(Collection<Meal> meals, Predicate<Meal> filter) {
+        return meals.stream()
+                .filter(filter)
+                .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
     }
 }

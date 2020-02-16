@@ -31,7 +31,6 @@ public class MealServlet extends HttpServlet {
 
     @Override
     public void destroy() {
-        super.destroy();
         context.close();
     }
 
@@ -66,12 +65,16 @@ public class MealServlet extends HttpServlet {
                 break;
             case "filter":
                 log.info("getFiltered");
-                request.setAttribute("meals", controller.getFiltered(
-                        request.getParameter("fromDate"),
-                        request.getParameter("toDate"),
-                        request.getParameter("fromTime"),
-                        request.getParameter("toTime")
-                ));
+                String fromDate = request.getParameter("fromDate");
+                String toDate = request.getParameter("toDate");
+                String fromTime = request.getParameter("fromTime");
+                String toTime = request.getParameter("toTime");
+
+                request.setAttribute("meals", controller.getFiltered(fromDate, toDate, fromTime, toTime));
+                request.setAttribute("fromDate", fromDate);
+                request.setAttribute("toDate", toDate);
+                request.setAttribute("fromTime", fromTime);
+                request.setAttribute("toTome", toTime);
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;
             case "create":

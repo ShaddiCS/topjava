@@ -15,7 +15,7 @@ public interface MealRepository {
     // null if not found
     Meal get(int userId, int id);
 
-    Collection<Meal> findByDateBetween(int userId, int calories, LocalDate fromDate, LocalDate toDate);
+    Collection<Meal> findByDateBetween(int userId, LocalDate fromDate, LocalDate toDate);
 
     Collection<Meal> getAll(int userId);
 }

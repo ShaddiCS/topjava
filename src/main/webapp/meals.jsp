@@ -34,15 +34,16 @@
             </tr>
             <tr>
                 <input type="hidden" name="action" value="filter">
-                <td><input type="date" name="fromDate"></td>
-                <td><input type="date" name="toDate"></td>
-                <td><input type="time" name="fromTime"></td>
-                <td><input type="time" name="toTime"></td>
+                <td><input type="date" name="fromDate" value="${fromDate}"></td>
+                <td><input type="date" name="toDate" value="${toDate}"></td>
+                <td><input type="time" name="fromTime" value="${fromTime}"></td>
+                <td><input type="time" name="toTime" value="${toTime}"></td>
             </tr>
         </table>
         <hr>
         <button type="submit" >Filter</button>
     </form>
+    <a href="meals"><button type="submit">Clear</button></a>
     <br>
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>

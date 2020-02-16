@@ -11,10 +11,12 @@ import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Collection;
+import java.util.List;
 
 import static ru.javawebinar.topjava.web.SecurityUtil.authUserCaloriesPerDay;
 import static ru.javawebinar.topjava.web.SecurityUtil.authUserId;
+import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
+import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
 
 @Controller
 public class MealRestController {
@@ -28,6 +30,8 @@ public class MealRestController {
     }
 
     public Meal create(Meal meal) {
+        log.info("create {}", meal);
+        checkNew(meal);
         return service.create(authUserId(), meal);
     }
 
@@ -37,18 +41,23 @@ public class MealRestController {
     }
 
     public Meal get(int id) {
+        log.info("git {}", id);
         return service.get(authUserId(), id);
     }
 
-    public Collection<MealTo> getAll() {
+    public List<MealTo> getAll() {
+        log.info("get all");
         return service.getAll(SecurityUtil.authUserId(), SecurityUtil.authUserCaloriesPerDay());
     }
 
     public void update(Meal meal, int id) {
-        service.update(authUserId(), meal, id);
+        log.info("update {} with id={}", meal, id);
+        assureIdConsistent(meal, id);
+        service.update(authUserId(), meal);
     }
 
-    public Collection<MealTo> getFiltered(String fromDate, String toDate, String fromTime, String toTime) {
+    public List<MealTo> getFiltered(String fromDate, String toDate, String fromTime, String toTime) {
+        log.info("get filtered");
         return service.getFiltered(authUserId(),
                 authUserCaloriesPerDay(),
                 fromDate == null  || fromDate.isEmpty() ? LocalDate.MIN : LocalDate.parse(fromDate),
