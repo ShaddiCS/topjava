@@ -41,7 +41,6 @@ public class MealServlet extends HttpServlet {
         String id = request.getParameter("id");
 
         Meal meal = new Meal(id.isEmpty() ? null : Integer.valueOf(id),
-                SecurityUtil.authUserId(),
                 LocalDateTime.parse(request.getParameter("dateTime")),
                 request.getParameter("description"),
                 Integer.parseInt(request.getParameter("calories")));
@@ -58,7 +57,6 @@ public class MealServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-        int userId = SecurityUtil.authUserId();
 
         switch (action == null ? "all" : action) {
             case "delete":
@@ -66,10 +64,20 @@ public class MealServlet extends HttpServlet {
                 controller.delete(id);
                 response.sendRedirect("meals");
                 break;
+            case "filter":
+                log.info("getFiltered");
+                request.setAttribute("meals", controller.getFiltered(
+                        request.getParameter("fromDate"),
+                        request.getParameter("toDate"),
+                        request.getParameter("fromTime"),
+                        request.getParameter("toTime")
+                ));
+                request.getRequestDispatcher("/meals.jsp").forward(request, response);
+                break;
             case "create":
             case "update":
                 final Meal meal = "create".equals(action) ?
-                        new Meal(userId, LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
+                        new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
                         controller.get(getId(request));
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
@@ -77,12 +85,7 @@ public class MealServlet extends HttpServlet {
             case "all":
             default:
                 log.info("getAll");
-                request.setAttribute("meals", controller.getFiltered(
-                        request.getParameter("fromDate"),
-                        request.getParameter("toDate"),
-                        request.getParameter("fromTime"),
-                        request.getParameter("toTime")
-                ));
+                request.setAttribute("meals", controller.getAll());
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;
         }

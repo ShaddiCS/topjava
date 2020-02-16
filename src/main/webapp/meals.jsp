@@ -33,6 +33,7 @@
                 <td>To time</td>
             </tr>
             <tr>
+                <input type="hidden" name="action" value="filter">
                 <td><input type="date" name="fromDate"></td>
                 <td><input type="date" name="toDate"></td>
                 <td><input type="time" name="fromTime"></td>
@@ -40,7 +41,7 @@
             </tr>
         </table>
         <hr>
-        <button type="submit">Filter</button>
+        <button type="submit" >Filter</button>
     </form>
     <br>
     <table border="1" cellpadding="8" cellspacing="0">

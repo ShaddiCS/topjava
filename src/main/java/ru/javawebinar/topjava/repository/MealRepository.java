@@ -7,7 +7,7 @@ import java.util.Collection;
 
 public interface MealRepository {
     // null if not found, when updated
-    Meal save(Meal meal);
+    Meal save(int userId, Meal meal);
 
     // false if not found
     boolean delete(int userId, int id);
@@ -16,4 +16,6 @@ public interface MealRepository {
     Meal get(int userId, int id);
 
     Collection<Meal> findByDateBetween(int userId, int calories, LocalDate fromDate, LocalDate toDate);
+
+    Collection<Meal> getAll(int userId);
 }

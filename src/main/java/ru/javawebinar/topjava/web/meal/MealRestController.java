@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealTo;
+import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -18,11 +19,16 @@ import static ru.javawebinar.topjava.web.SecurityUtil.authUserId;
 @Controller
 public class MealRestController {
     protected final Logger log = LoggerFactory.getLogger(getClass());
-    @Autowired
+
     private MealService service;
 
+    @Autowired
+    public MealRestController(MealService service) {
+        this.service = service;
+    }
+
     public Meal create(Meal meal) {
-        return service.create(meal);
+        return service.create(authUserId(), meal);
     }
 
     public void delete(int id) {
@@ -35,11 +41,11 @@ public class MealRestController {
     }
 
     public Collection<MealTo> getAll() {
-        return getFiltered(null, null, null, null);
+        return service.getAll(SecurityUtil.authUserId(), SecurityUtil.authUserCaloriesPerDay());
     }
 
     public void update(Meal meal, int id) {
-        service.update(meal, id);
+        service.update(authUserId(), meal, id);
     }
 
     public Collection<MealTo> getFiltered(String fromDate, String toDate, String fromTime, String toTime) {

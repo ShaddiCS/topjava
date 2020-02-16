@@ -21,42 +21,53 @@ public class InMemoryMealRepository implements MealRepository {
     private AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.MEALS.forEach(this::save);
+        MealsUtil.MEALS.forEach(meal -> save(1, meal));
     }
 
     @Override
-    public Meal save(Meal meal) {
+    public Meal save(int userId, Meal meal) {
         log.info("save {}", meal);
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            repository.computeIfAbsent(meal.getUserId(), HashMap::new).put(meal.getId(), meal);
+            repository.computeIfAbsent(userId, HashMap::new).put(meal.getId(), meal);
             return meal;
         }
         // handle case: update, but not present in storage
-        return repository.get(meal.getUserId()).computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
+        return repository.get(userId).computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
     }
 
     @Override
     public boolean delete(int userId, int id) {
         log.info("delete {}", id);
-        return repository.get(userId).remove(id) != null;
+        return repository.computeIfAbsent(userId, HashMap::new).remove(id) != null;
     }
 
     @Override
     public Meal get(int userId, int id) {
         log.info("get {}", id);
-        return repository.get(userId).get(id);
+        return repository.computeIfAbsent(userId, HashMap::new).get(id);
     }
 
     @Override
     public Collection<Meal> findByDateBetween(int userId, int calories, LocalDate fromDate, LocalDate toDate) {
         if(repository.get(userId) == null) {
-            return new ArrayList<>();
+            return repository.computeIfAbsent(userId, HashMap::new).values();
         }
         return repository.get(userId).values().stream()
                 .filter(meal -> DateTimeUtil.isBetweenInclusive(meal.getDate(), fromDate, toDate))
                 .sorted(Comparator.comparing(Meal::getDate).reversed()
                     .thenComparing(Comparator.comparing(Meal::getTime).reversed()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<Meal> getAll(int userId) {
+        if(repository.get(userId) == null) {
+            return repository.computeIfAbsent(userId, HashMap::new).values();
+        }
+        return repository.get(userId).values().stream()
+                .sorted(Comparator.comparing(Meal::getDate).reversed()
+                        .thenComparing(Comparator.comparing(Meal::getTime).reversed()))
                 .collect(Collectors.toList());
     }
 }
