@@ -34,10 +34,10 @@
             </tr>
             <tr>
                 <input type="hidden" name="action" value="filter">
-                <td><input type="date" name="fromDate" value="${fromDate}"></td>
-                <td><input type="date" name="toDate" value="${toDate}"></td>
-                <td><input type="time" name="fromTime" value="${fromTime}"></td>
-                <td><input type="time" name="toTime" value="${toTime}"></td>
+                <td><input type="date" name="fromDate" value="${param.fromDate}"></td>
+                <td><input type="date" name="toDate" value="${param.toDate}"></td>
+                <td><input type="time" name="fromTime" value="${param.fromTime}"></td>
+                <td><input type="time" name="toTime" value="${param.toTime}"></td>
             </tr>
         </table>
         <hr>

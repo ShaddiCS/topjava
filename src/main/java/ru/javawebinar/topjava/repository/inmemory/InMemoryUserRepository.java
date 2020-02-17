@@ -21,9 +21,9 @@ public class InMemoryUserRepository implements UserRepository {
     AtomicInteger counter = new AtomicInteger(0);
 
     {
-        save(new User(counter.incrementAndGet(), "Bob", "some@some.com", "1234", Role.ROLE_USER));
-        save(new User(counter.incrementAndGet(), "Andy", "another@another.com", "1234", Role.ROLE_USER));
-        save(new User(counter.incrementAndGet(), "John", "more@more.com", "1234", Role.ROLE_USER));
+        save(new User(null, "Bob", "some@some.com", "1234", Role.ROLE_USER));
+        save(new User(null, "Andy", "another@another.com", "1234", Role.ROLE_USER));
+        save(new User(null, "John", "more@more.com", "1234", Role.ROLE_USER));
     }
 
     @Override
