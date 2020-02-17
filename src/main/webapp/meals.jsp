@@ -42,8 +42,8 @@
         </table>
         <hr>
         <button type="submit" >Filter</button>
+        <button type="reset" onclick="window.location.href='meals'">Clear</button>
     </form>
-    <a href="meals"><button type="submit">Clear</button></a>
     <br>
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>
