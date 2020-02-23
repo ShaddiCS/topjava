@@ -13,7 +13,6 @@ import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
-import java.util.Comparator;
 import java.util.List;
 
 import static ru.javawebinar.topjava.MealTestData.*;
@@ -38,7 +37,7 @@ public class MealServiceTest {
     @Test
     public void get() {
         Meal meal = service.get(MEAL_ID, USER_ID);
-        assertMatch(meal, TEST_MEAL);
+        assertMatch(meal, MEAL1);
     }
 
     @Test(expected = NotFoundException.class)
@@ -51,10 +50,10 @@ public class MealServiceTest {
         service.get(MEAL_ID, ADMIN_ID);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void delete() throws Exception{
-        service.delete(MEAL_ID, USER_ID);
-        service.get(MEAL_ID, USER_ID);
+        service.delete(MEAL_ID + 7, ADMIN_ID);
+        assertMatch(service.getAll(ADMIN_ID), ADMIN_DINNER);
     }
 
     @Test(expected = NotFoundException.class)
@@ -69,16 +68,14 @@ public class MealServiceTest {
 
     @Test
     public void getBetweenHalfOpen() {
-        List<Meal> meals = service.getBetweenHalfOpen(START_DATE, END_DATE, ADMIN_ID);
-        assertMatch(meals, ADMIN_DINNER, ADMIN_LUNCH);
+        List<Meal> meals = service.getBetweenHalfOpen(START_DATE, END_DATE, USER_ID);
+        assertMatch(meals, MEAL7, MEAL6, MEAL5, MEAL4);
     }
 
     @Test
     public void getAll() {
         List<Meal> meals = service.getAll(USER_ID);
-        List<Meal> sortedActual = MEALS;
-        sortedActual.sort(Comparator.comparing(Meal::getDateTime).reversed());
-        assertMatch(sortedActual, meals);
+        assertMatch(MEALS, meals);
     }
 
     @Test
