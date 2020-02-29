@@ -5,7 +5,7 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.rules.TestWatcher;
+import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
@@ -41,40 +42,27 @@ public class MealServiceTest {
     @Autowired
     private MealRepository repository;
 
-    private static Logger logger = LoggerFactory.getLogger(MealServiceTest.class);
-    private static List<String> logs = new ArrayList<>();
-
+    @Rule
     @ClassRule
-    public static TestWatcher classWatcher = new TestWatcher() {
+    public static Stopwatch stopwatch = new Stopwatch() {
+        Logger logger = LoggerFactory.getLogger(MealServiceTest.class);
+        List<String> logs = new ArrayList<>();
 
         @Override
-        protected void finished(Description description) {
-            for(String x : logs) {
-                logger.info(x);
+        protected void finished(long nanos, Description description) {
+            if(description.isTest()) {
+                String message = description.getMethodName() + " - " + TimeUnit.MILLISECONDS.convert(nanos, TimeUnit.NANOSECONDS) + " milliseconds";
+                logger.info(message);
+                logs.add(message);
+            }
+            if(description.isSuite()) {
+                logger.info("Execution times for all methods: " + String.join(", ", logs));
             }
         }
     };
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
-    @Rule
-    public TestWatcher watcher = new TestWatcher() {
-
-        long millis;
-        @Override
-        protected void starting(Description description) {
-            millis = System.currentTimeMillis();
-        }
-
-        @Override
-        protected void finished(Description description) {
-            millis = System.currentTimeMillis() - millis;
-            String message = description.getDisplayName() + " execute time - " + millis + " milliseconds.";
-            logs.add(message);
-            logger.debug(message);
-        }
-    };
 
     @Test
     public void delete() throws Exception {
