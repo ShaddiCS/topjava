@@ -5,9 +5,29 @@
     </contextListener>
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>SUMMARY</marker>
+            </evaluator>
+            <onMatch>DENY</onMatch>
+        </filter>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%cyan(%d{HH:mm:ss.SSS}) %-5level %blue(%class{50}.%M:%L) - %white(%msg%n)</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %class{50}.%M:%L - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="consoleSummary" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+                <marker>SUMMARY</marker>
+            </evaluator>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %class{50}.%M:%L%n%cyan(%msg%n)</pattern>
         </encoder>
     </appender>
 
@@ -17,6 +37,7 @@
 
     <root level="INFO">
         <appender-ref ref="console"/>
+        <appender-ref ref="consoleSummary"/>
     </root>
 
 </configuration>

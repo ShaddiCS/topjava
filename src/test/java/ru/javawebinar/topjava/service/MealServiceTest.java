@@ -10,6 +10,8 @@ import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
@@ -51,12 +53,13 @@ public class MealServiceTest {
         @Override
         protected void finished(long nanos, Description description) {
             if(description.isTest()) {
-                String message = description.getMethodName() + " - " + TimeUnit.MILLISECONDS.convert(nanos, TimeUnit.NANOSECONDS) + " milliseconds";
-                logger.info(message);
-                logs.add(message);
+                long millis = TimeUnit.MILLISECONDS.convert(nanos, TimeUnit.NANOSECONDS);
+                logger.info("{} - {} milliseconds", description.getMethodName(), millis);
+                logs.add(String.format("%-25s - %-3s milliseconds", description.getMethodName(), millis));
             }
             if(description.isSuite()) {
-                logger.info("Execution times for all methods: " + String.join(", ", logs));
+                Marker marker = MarkerFactory.getMarker("SUMMARY");
+                logger.info(marker, "Test execution times:\n{}", String.join("\n", logs));
             }
         }
     };
