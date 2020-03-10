@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
-import ru.javawebinar.topjava.repository.datajpa.DataJpaUserRepository;
 
 import java.util.List;
 
@@ -54,6 +53,6 @@ public class UserService {
     }
 
     public User getWithMeal(int id) {
-        return repository.getWithMeal(id);
+        return checkNotFoundWithId(repository.getWithMeal(id), id);
     }
 }
