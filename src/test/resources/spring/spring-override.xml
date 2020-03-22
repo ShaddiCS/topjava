@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/util
+           https://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="cacheManager" class="org.springframework.cache.support.NoOpCacheManager"/>
+    <beans profile="jpa, datajpa">
+        <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+            <property name="location" value="classpath:beanOverride.properties"/>
+        </bean>
+
+        <util:map id="propertyMap" map-class="java.util.HashMap" key-type="java.lang.String"
+                  value-type="java.lang.Object">
+            <entry key="#{T(org.hibernate.cfg.AvailableSettings).FORMAT_SQL}" value="true"/>
+            <entry key="#{T(org.hibernate.cfg.AvailableSettings).USE_SQL_COMMENTS}" value="true"/>
+            <entry key="#{T(org.hibernate.cfg.AvailableSettings).JPA_PROXY_COMPLIANCE}" value="false"/>
+
+            <entry key="#{T(org.hibernate.cfg.AvailableSettings).CACHE_REGION_FACTORY}"
+                   value="org.hibernate.cache.jcache.internal.JCacheRegionFactory"/>
+            <entry key="#{T(org.hibernate.cache.jcache.ConfigSettings).PROVIDER}"
+                   value="org.ehcache.jsr107.EhcacheCachingProvider"/>
+            <entry key="#{T(org.hibernate.cfg.AvailableSettings).USE_SECOND_LEVEL_CACHE}" value="false"/>
+        </util:map>
+    </beans>
+</beans>

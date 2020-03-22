@@ -63,6 +63,13 @@
             <constructor-arg ref="dataSource"/>
         </bean>
 
+        <bean id="validationFactory" class="javax.validation.Validation" factory-method="buildDefaultValidatorFactory" />
+
+        <bean id="validator" factory-bean="validationFactory" factory-method="getValidator" />
+        <bean class="ru.javawebinar.topjava.repository.JdbcUtil">
+            <property name="validator" ref="validator" />
+        </bean>
+
         <bean id="namedJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
             <constructor-arg ref="jdbcTemplate"/>
         </bean>
