@@ -1,5 +1,7 @@
 package ru.javawebinar.topjava.web.meal;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -21,13 +23,18 @@ import java.util.List;
 @RequestMapping("/meals")
 public class JspMealController {
 
+    private static final Logger log = LoggerFactory.getLogger(MealRestController.class);
+
     @Autowired
     private MealService mealService;
 
     @GetMapping
     public String list(Model model) {
         int userId = SecurityUtil.authUserId();
+
+        log.info("getAll for user {}", userId);
         List<MealTo> mealTos = MealsUtil.getTos(mealService.getAll(userId), SecurityUtil.authUserCaloriesPerDay());
+
         model.addAttribute("meals", mealTos);
         return "meals";
     }
@@ -39,10 +46,11 @@ public class JspMealController {
                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime endTime,
                          Model model) {
         int userId = SecurityUtil.authUserId();
+
+        log.info("getBetween dates({} - {}) time({} - {}) for user {}", startDate, endDate, startTime, endTime, userId);
         List<Meal> mealList = mealService.getBetweenInclusive(startDate, endDate, userId);
 
         model.addAttribute("meals", MealsUtil.getFilteredTos(mealList, SecurityUtil.authUserCaloriesPerDay(), startTime, endTime));
-
         return "meals";
     }
 
@@ -56,9 +64,11 @@ public class JspMealController {
         int userId = SecurityUtil.authUserId();
 
         if (id == null) {
+            log.info("create {} for user {}", meal, userId);
             mealService.create(meal, userId);
         } else {
             meal.setId(id);
+            log.info("update {} for user {}", meal, userId);
             mealService.update(meal, userId);
         }
 
@@ -68,7 +78,9 @@ public class JspMealController {
     @GetMapping("{id}")
     public String getOne(@PathVariable("id") Integer id, Model model) {
         int userId = SecurityUtil.authUserId();
-        Meal meal = mealService.get(id, SecurityUtil.authUserId());
+
+        log.info("get meal {} for user {}", id, userId);
+        Meal meal = mealService.get(id, userId);
 
         model.addAttribute("meal", meal);
         return "mealForm";
@@ -85,6 +97,7 @@ public class JspMealController {
     public String delete(@PathVariable("id") Integer id) {
         int userId = SecurityUtil.authUserId();
 
+        log.info("delete meal {} for user {}", id, userId);
         mealService.delete(id, userId);
 
         return "redirect:/meals";

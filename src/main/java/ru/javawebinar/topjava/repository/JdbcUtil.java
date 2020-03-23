@@ -12,8 +12,8 @@ public class JdbcUtil{
     @Autowired
     private static Validator validator;
 
-    public static <T extends AbstractBaseEntity> void validate(T entity) {
-        Set<ConstraintViolation<T>> violations = validator.validate(entity);
+    public static <T extends AbstractBaseEntity> void validate(T entity, Class<?>...groups) {
+        Set<ConstraintViolation<T>> violations = validator.validate(entity, groups);
         if(violations.size() > 0) {
             throw new ConstraintViolationException(violations);
         }
