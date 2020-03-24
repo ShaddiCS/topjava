@@ -66,7 +66,7 @@
         <bean id="validationFactory" class="javax.validation.Validation" factory-method="buildDefaultValidatorFactory" />
 
         <bean id="validator" factory-bean="validationFactory" factory-method="getValidator" />
-        <bean class="ru.javawebinar.topjava.repository.JdbcUtil">
+        <bean class="ru.javawebinar.topjava.repository.jdbc.JdbcUtil">
             <property name="validator" ref="validator" />
         </bean>
 
@@ -115,8 +115,6 @@
         <!-- Transaction manager for a single JPA EntityManagerFactory (alternative to JTA) -->
         <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
               p:entityManagerFactory-ref="entityManagerFactory"/>
-
-        <bean class="ru.javawebinar.topjava.repository.JpaUtil"/>
     </beans>
 
     <beans profile="jpa">

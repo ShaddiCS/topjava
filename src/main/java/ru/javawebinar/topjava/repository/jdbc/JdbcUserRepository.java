@@ -14,7 +14,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
-import ru.javawebinar.topjava.repository.JdbcUtil;
 import ru.javawebinar.topjava.repository.UserRepository;
 
 import java.sql.PreparedStatement;
@@ -55,11 +54,12 @@ public class JdbcUserRepository implements UserRepository {
             Number newKey = insertUser.executeAndReturnKey(parameterSource);
             user.setId(newKey.intValue());
         } else {
-            jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", user.getId());
-            if(namedParameterJdbcTemplate.update(
-                "UPDATE users SET name=:name, email=:email, password=:password, " +
-                        "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource) == 0) {
+            if (namedParameterJdbcTemplate.update(
+                    "UPDATE users SET name=:name, email=:email, password=:password, " +
+                            "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource) == 0) {
                 return null;
+            } else {
+                jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", user.getId());
             }
         }
         jdbcTemplate.batchUpdate("INSERT INTO user_roles (user_id, role) VALUES (?, ?)",
@@ -110,22 +110,18 @@ public class JdbcUserRepository implements UserRepository {
 
     public static class UserExtractor implements ResultSetExtractor<List<User>> {
         private static final BeanPropertyRowMapper<User> ROW_MAPPER = BeanPropertyRowMapper.newInstance(User.class);
+
         @Override
         public List<User> extractData(ResultSet rs) throws SQLException, DataAccessException {
             Map<Integer, User> userMap = new LinkedHashMap<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 int id = rs.getInt("id");
-                userMap.computeIfAbsent(id, (o1) -> {
-                    User user = null;
-                    try {
-                        user = ROW_MAPPER.mapRow(rs, rs.getRow());
-                        Objects.requireNonNull(user).setRoles(new ArrayList<>());
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    return user;
-                });
 
+                if (!userMap.containsKey(id)) {
+                    User user = ROW_MAPPER.mapRow(rs, rs.getRow());
+                    Objects.requireNonNull(user).setRoles(new ArrayList<>());
+                    userMap.put(id, user);
+                }
                 userMap.get(id).getRoles().add(Role.valueOf(rs.getString("role")));
             }
             return new ArrayList<>(userMap.values());

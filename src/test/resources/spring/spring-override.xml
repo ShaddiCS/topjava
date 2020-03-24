@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:cache="http://www.springframework.org/schema/cache"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
 
-    <bean id="cacheManager" class="org.springframework.cache.support.NoOpCacheManager"/>
+    <cache:annotation-driven cache-manager="noOpCacheManager" />
+
+    <bean id="noOpCacheManager" class="org.springframework.cache.support.NoOpCacheManager"/>
+
     <beans profile="jpa, datajpa">
         <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
-            <property name="location" value="classpath:beanOverride.properties"/>
+            <property name="properties" ref="beanOverride" />
         </bean>
+
+        <util:properties id="beanOverride">
+            <prop key="entityManagerFactory.jpaPropertyMap[hibernate.cache.use_second_level_cache]">false</prop>
+        </util:properties>
     </beans>
 </beans>

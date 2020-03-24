@@ -4,14 +4,13 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import javax.validation.groups.Default;
 
 
 @MappedSuperclass
 public abstract class AbstractNamedEntity extends AbstractBaseEntity {
 
-    @NotBlank(groups = {Meal.JdbcUserTest.class, Default.class})
-    @Size(min = 2, max = 100, groups = {Meal.JdbcUserTest.class, Default.class})
+    @NotBlank
+    @Size(min = 2, max = 100)
     @Column(name = "name", nullable = false)
     protected String name;
 

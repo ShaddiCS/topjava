@@ -1,17 +1,11 @@
 package ru.javawebinar.topjava.web.meal;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealTo;
-import ru.javawebinar.topjava.util.MealsUtil;
-import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,19 +15,11 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/meals")
-public class JspMealController {
-
-    private static final Logger log = LoggerFactory.getLogger(MealRestController.class);
-
-    @Autowired
-    private MealService mealService;
+public class JspMealController extends AbstractMealController{
 
     @GetMapping
     public String list(Model model) {
-        int userId = SecurityUtil.authUserId();
-
-        log.info("getAll for user {}", userId);
-        List<MealTo> mealTos = MealsUtil.getTos(mealService.getAll(userId), SecurityUtil.authUserCaloriesPerDay());
+        List<MealTo> mealTos = super.getAll();
 
         model.addAttribute("meals", mealTos);
         return "meals";
@@ -45,12 +31,9 @@ public class JspMealController {
                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime startTime,
                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime endTime,
                          Model model) {
-        int userId = SecurityUtil.authUserId();
+        List<MealTo> mealList = super.getBetween(startDate, startTime, endDate, endTime);
 
-        log.info("getBetween dates({} - {}) time({} - {}) for user {}", startDate, endDate, startTime, endTime, userId);
-        List<Meal> mealList = mealService.getBetweenInclusive(startDate, endDate, userId);
-
-        model.addAttribute("meals", MealsUtil.getFilteredTos(mealList, SecurityUtil.authUserCaloriesPerDay(), startTime, endTime));
+        model.addAttribute("meals", mealList);
         return "meals";
     }
 
@@ -61,15 +44,11 @@ public class JspMealController {
                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                LocalDateTime dateTime) {
         Meal meal = new Meal(dateTime, description, calories);
-        int userId = SecurityUtil.authUserId();
 
         if (id == null) {
-            log.info("create {} for user {}", meal, userId);
-            mealService.create(meal, userId);
+            super.create(meal);
         } else {
-            meal.setId(id);
-            log.info("update {} for user {}", meal, userId);
-            mealService.update(meal, userId);
+            super.update(meal, id);
         }
 
         return "redirect:meals";
@@ -77,10 +56,7 @@ public class JspMealController {
 
     @GetMapping("{id}")
     public String getOne(@PathVariable("id") Integer id, Model model) {
-        int userId = SecurityUtil.authUserId();
-
-        log.info("get meal {} for user {}", id, userId);
-        Meal meal = mealService.get(id, userId);
+        Meal meal = super.get(id);
 
         model.addAttribute("meal", meal);
         return "mealForm";
@@ -95,10 +71,7 @@ public class JspMealController {
 
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable("id") Integer id) {
-        int userId = SecurityUtil.authUserId();
-
-        log.info("delete meal {} for user {}", id, userId);
-        mealService.delete(id, userId);
+        super.delete(id);
 
         return "redirect:/meals";
     }

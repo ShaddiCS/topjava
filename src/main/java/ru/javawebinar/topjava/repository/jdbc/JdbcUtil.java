@@ -1,4 +1,4 @@
-package ru.javawebinar.topjava.repository;
+package ru.javawebinar.topjava.repository.jdbc;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.javawebinar.topjava.model.AbstractBaseEntity;

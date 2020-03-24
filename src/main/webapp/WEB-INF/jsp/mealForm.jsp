@@ -9,16 +9,7 @@
 <jsp:include page="fragments/bodyHeader.jsp"/>
 
 <section>
-    <c:choose>
-        <c:when test="${meal['new']}">
-            <spring:message var="title" code="meal.form.add"/>
-        </c:when>
-        <c:when test="${!meal['new']}">
-            <spring:message var="title" code="meal.form.edit"/>
-        </c:when>
-    </c:choose>
-
-    <h2>${title}</h2>
+    <h2><spring:message code="${meal['new'] ? 'meal.form.add' : 'meal.form.edit'}"/></h2>
     <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
     <form method="post" action="meals">
         <input type="hidden" name="id" value="${meal.id}">
