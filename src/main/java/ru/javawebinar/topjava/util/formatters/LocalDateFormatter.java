@@ -4,7 +4,7 @@ import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Formatter;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
-import org.springframework.util.StringUtils;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -15,7 +15,7 @@ import java.util.Set;
 public class LocalDateFormatter implements Formatter<LocalDate> {
     @Override
     public LocalDate parse(String text, Locale locale) throws ParseException {
-        return StringUtils.isEmpty(text) ? null : LocalDate.parse(text);
+        return DateTimeUtil.parseLocalDate(text);
     }
 
     @Override
