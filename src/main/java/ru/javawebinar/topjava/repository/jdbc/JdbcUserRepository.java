@@ -118,4 +118,9 @@ public class JdbcUserRepository implements UserRepository {
         }
         return u;
     }
+
+    @Override
+    public boolean setStatus(int id, boolean status) {
+        return false;
+    }
 }

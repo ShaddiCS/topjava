@@ -39,4 +39,18 @@ $(function () {
             })
         }
     );
+
+    $(".custom-checkbox").change(function() {
+        updateStatus($(this).attr("id"), $(this).val())
+    })
 });
+
+function updateStatus(id, status) {
+    $.ajax({
+        url: context.ajaxUrl + id + "/status",
+        type: "POST",
+        data: "false"
+    }).done(function(){
+        updateTable()
+    })
+}

@@ -11,6 +11,43 @@
 
 <div class="jumbotron pt-4">
     <div class="container">
+        <div class="card border-dark">
+            <div class="card-body pb-0">
+                <form id="filter">
+                    <div class="row">
+                        <div class="offset-1 col-2">
+                            <label for="startDate"><spring:message code="meal.startDate"/></label>
+                            <input type="text" class="form-control" name="startDate" id="startDate" autocomplete="off">
+                        </div>
+                        <div class="col-2">
+                            <label for="endDate"><spring:message code="meal.endDate"/></label>
+                            <input class="form-control" name="endDate" id="endDate" autocomplete="off">
+                        </div>
+                        <div class="offset-2 col-2">
+                            <label for="startTime"><spring:message code="meal.startTime"/></label>
+                            <input class="form-control" name="startTime" id="startTime" autocomplete="off">
+                        </div>
+                        <div class="col-2">
+                            <label for="endTime"><spring:message code="meal.endTime"/></label>
+                            <input class="form-control" name="endTime" id="endTime" autocomplete="off">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-footer text-right">
+                <button class="btn btn-danger" onclick="clearFilter()">
+                    <span class="fa fa-remove"></span>
+                    <spring:message code="common.cancel"/>
+                </button>
+
+                <button class="btn btn-primary" onclick="updateFilteredTable()">
+                    <span class="fa fa-filter"></span>
+                    <spring:message code="meal.filter"/>
+                </button>
+            </div>
+        </div>
+
         <h3 class="text-center"><spring:message code="meal.title"/></h3>
         <button class="btn btn-primary" onclick="add()">
             <span class="fa fa-plus"></span>
@@ -57,7 +94,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="description" class="col-form-label"><spring:message code="meal.description"/></label>
+                        <label for="description" class="col-form-label"><spring:message
+                                code="meal.description"/></label>
                         <input id="description" name="description" class="form-control" type="text" required>
                     </div>
 
@@ -80,28 +118,6 @@
         </div>
     </div>
 </div>
-
-
-
-<form method="get" action="meals/filter">
-    <dl>
-        <dt><spring:message code="meal.startDate"/>:</dt>
-        <dd><input type="date" name="startDate" value="${param.startDate}"></dd>
-    </dl>
-    <dl>
-        <dt><spring:message code="meal.endDate"/>:</dt>
-        <dd><input type="date" name="endDate" value="${param.endDate}"></dd>
-    </dl>
-    <dl>
-        <dt><spring:message code="meal.startTime"/>:</dt>
-        <dd><input type="time" name="startTime" value="${param.startTime}"></dd>
-    </dl>
-    <dl>
-        <dt><spring:message code="meal.endTime"/>:</dt>
-        <dd><input type="time" name="endTime" value="${param.endTime}"></dd>
-    </dl>
-    <button type="submit"><spring:message code="meal.filter"/></button>
-</form>
 <hr>
 <a href="meals/create"><spring:message code="meal.add"/></a>
 <hr>
