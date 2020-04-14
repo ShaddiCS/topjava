@@ -15,11 +15,21 @@ $(function () {
     makeEditable({
         ajaxUrl: "ajax/profile/meals/",
         datatableApi: $("#datatable").DataTable({
+            "ajax": {
+                "url": "ajax/profile/meals/",
+                "dataSrc": ""
+            },
             "paging": false,
             "info": true,
             "columns": [
                 {
-                    "data": "dateTime"
+                    "data": "dateTime",
+                    "render": function (date, type, row) {
+                        if (type === "display") {
+                            return date.substring(0, 10) + " " + date.substring(11);
+                        }
+                        return date;
+                    }
                 },
                 {
                     "data": "description"
@@ -29,11 +39,13 @@ $(function () {
                 },
                 {
                     "defaultContent": "Edit",
-                    "orderable": false
+                    "orderable": false,
+                    "render": renderEditBtn
                 },
                 {
                     "defaultContent": "Delete",
-                    "orderable": false
+                    "orderable": false,
+                    "render": renderDeleteBtn
                 }
             ],
             "order": [
@@ -41,8 +53,38 @@ $(function () {
                     0,
                     "desc"
                 ]
-            ]
+            ],
+            "createdRow": function (row, data, dataIndex) {
+                if (!data.excess) {
+                    $(row).attr("data-mealexcess", false);
+                } else {
+                    $(row).attr("data-mealexcess", true);
+                }
+            }
         }),
         updateTable: updateFilteredTable
+    });
+    $('#startDate').datetimepicker({
+        format:'Y-m-d',
+        timepicker:false
+    });
+
+    $('#endDate').datetimepicker({
+        format:'Y-m-d',
+        timepicker:false
+    });
+
+    $('#startTime').datetimepicker({
+        format:'H:i',
+        datepicker:false
+    });
+
+    $('#endTime').datetimepicker({
+        format:'H:i',
+        datepicker:false
+    });
+
+    $('#dateTime').datetimepicker({
+        format:'Y-m-d\\TH:i'
     });
 });
