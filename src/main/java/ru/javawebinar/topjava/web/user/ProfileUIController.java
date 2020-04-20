@@ -1,13 +1,20 @@
 package ru.javawebinar.topjava.web.user;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.SessionStatus;
 import ru.javawebinar.topjava.to.UserTo;
+import ru.javawebinar.topjava.web.EmailValidator;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
 import javax.validation.Valid;
@@ -16,6 +23,10 @@ import javax.validation.Valid;
 @RequestMapping("/profile")
 public class ProfileUIController extends AbstractUserController {
 
+    @Autowired
+    @Qualifier("emailValidator")
+    private Validator emailValidator;
+
     @GetMapping
     public String profile() {
         return "profile";
@@ -23,6 +34,8 @@ public class ProfileUIController extends AbstractUserController {
 
     @PostMapping
     public String updateProfile(@Valid UserTo userTo, BindingResult result, SessionStatus status) {
+        emailValidator.validate(userTo, result);
+
         if (result.hasErrors()) {
             return "profile";
         } else {
@@ -42,6 +55,8 @@ public class ProfileUIController extends AbstractUserController {
 
     @PostMapping("/register")
     public String saveRegister(@Valid UserTo userTo, BindingResult result, SessionStatus status, ModelMap model) {
+        emailValidator.validate(userTo, result);
+
         if (result.hasErrors()) {
             model.addAttribute("register", true);
             return "profile";

@@ -4,8 +4,12 @@ package ru.javawebinar.topjava.web.meal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.transaction.TestTransaction;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.MealTestData;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
@@ -13,6 +17,7 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -96,6 +101,47 @@ class MealRestControllerTest extends AbstractControllerTest {
         newMeal.setId(newId);
         MEAL_MATCHER.assertMatch(created, newMeal);
         MEAL_MATCHER.assertMatch(mealService.get(newId, USER_ID), newMeal);
+    }
+
+    @Test
+    void createWithWrongData() throws Exception {
+        Meal newMeal = MealTestData.getNew();
+        newMeal.setCalories(1);
+
+        perform(MockMvcRequestBuilders.post(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.writeValue(newMeal))
+                .with(userHttpBasic(USER)))
+                .andExpect(status().isUnprocessableEntity())
+                .andDo(print());
+
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    void createWithSameDate() throws Exception {
+        Meal newMeal = getNew();
+        newMeal.setDateTime(MEAL1.getDateTime());
+
+        perform(MockMvcRequestBuilders.post(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.writeValue(newMeal))
+                .with(userHttpBasic(USER)))
+                .andExpect(status().isConflict())
+                .andExpect(content().string(containsString("You already have meal with this date")));
+    }
+
+    @Test
+    void updateWithWrongData() throws Exception {
+        Meal updateMeal = MealTestData.getUpdated();
+        updateMeal.setCalories(1);
+
+        perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.writeValue(updateMeal))
+                .with(userHttpBasic(USER)))
+                .andExpect(status().isUnprocessableEntity())
+                .andDo(print());
     }
 
     @Test
