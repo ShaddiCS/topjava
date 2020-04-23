@@ -27,6 +27,11 @@ public class ProfileUIController extends AbstractUserController {
     @Qualifier("emailValidator")
     private Validator emailValidator;
 
+    @InitBinder
+    protected void initValidator(WebDataBinder webDataBinder) {
+        webDataBinder.addValidators(emailValidator);
+    }
+
     @GetMapping
     public String profile() {
         return "profile";
@@ -34,8 +39,6 @@ public class ProfileUIController extends AbstractUserController {
 
     @PostMapping
     public String updateProfile(@Valid UserTo userTo, BindingResult result, SessionStatus status) {
-        emailValidator.validate(userTo, result);
-
         if (result.hasErrors()) {
             return "profile";
         } else {
@@ -55,8 +58,6 @@ public class ProfileUIController extends AbstractUserController {
 
     @PostMapping("/register")
     public String saveRegister(@Valid UserTo userTo, BindingResult result, SessionStatus status, ModelMap model) {
-        emailValidator.validate(userTo, result);
-
         if (result.hasErrors()) {
             model.addAttribute("register", true);
             return "profile";
